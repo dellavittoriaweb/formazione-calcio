@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <title>Team Builder</title>
+    <style>
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+}
+
+.main-screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.main-screen h1 {
+    font-size: 4rem;
+    margin-bottom: 10px;
+    letter-spacing: 3px;
+}
+
+.main-screen p {
+    font-size: 1.3rem;
+    opacity: 0.85;
+    margin-bottom: 40px;
+}
+
+.main-screen button {
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    border: none;
+    padding: 15px 50px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.main-screen button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(255, 210, 0, 0.8);
+}
+        .game-screen {
+            display: none;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('campodacalciofinale.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        select {
+            margin-top: 10px;
+            padding: 5px;
+        }
+        .player-wrapper {
+            position: absolute;
+            text-align: center;
+        }
+        .budget-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #confirm-button {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #team-summary {
+            position: fixed;
+            bottom: 60px;
+            right: 10px;
+            background-color: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="main-screen">
+    <h1>Team Builder</h1>
+    <p><strong>Costruisci la squadra dei tuoi sogni con 350 milioni di budget</strong></p>
+    <button onclick="startGame()">Partire</button>
+</div>
+
+<div class="game-screen">
+    <div id="budget-display" class="budget-display">Budget rimanente: 350 milioni</div>
+    <button id="confirm-btn" onclick="confirmTeam()"
+        style="position:fixed; bottom:20px; right:20px;">
+    Conferma squadra
+    </button>
+</div>
+
+<script>
+const budget = 350;
+let currentBudget = budget;
+let selectedPlayers = {
+    portiere:null, difensoreS:null, difensoreD:null, terzinoD:null,
+    terzinoS:null, centrocampistaCC:null, centrocampistaD:null,
+    centrocampistaS:null, alaS:null, alaD:null, attaccante:null
+};
+
+// Lista completa dei giocatori
+const players = {
+    portiere: [
+        {nome:"Sommer", valore:5},
+        {nome:"Maignan", valore:45},
+        {nome:"Szczesny", valore:8},
+        {nome:"Carnesecchi", valore:13},
+        {nome:"Terracciano", valore:2.5},
+        {nome:"Svilar", valore:1.5},
+        {nome:"Provedel", valore:14},
+        {nome:"Meret", valore:15},
+        {nome:"Milinkovic-savic", valore:5}
+    ],
+    difensoreS: [
+        {nome:"Bastoni", valore:60},
+        {nome:"Tomori", valore:40},
+        {nome:"Gatti", valore:18},
+        {nome:"Beukema", valore:15},
+        {nome:"Djimsiti", valore:10},
+        {nome:"Milenkovic", valore:16},
+        {nome:"Ranieri", valore:5},
+        {nome:"Romagnoli", valore:15},
+        {nome:"Rrahmani", valore:20},
+        {nome:"Buongiorno", valore:22},
+        {nome:"Baschirotto", valore:7},
+        {nome:"Calafiori", valore:13}
+    ],
+        difensoreD: [
+        {nome: "Bremer", valore: 50},
+        {nome: "Kalulu", valore: 25},
+        {nome: "Danilo", valore: 12},
+        {nome: "Scalvini", valore: 40},
+        {nome: "Lucumì", valore: 11},
+        {nome: "Ranieri", valore: 5},
+        {nome: "Østigård", valore: 10},
+        {nome: "Pavard", valore: 40},
+        {nome: "Mancini", valore: 20},
+        {nome: "Acerbi", valore: 15}],
+    terzinoD: [
+        {nome: "Calabria", valore: 15},
+        {nome: "Posch", valore: 14},
+        {nome: "Karsdorp", valore: 7},
+        {nome: "Kayode", valore: 12},
+        {nome: "Marusic", valore: 5},
+        {nome: "Di Lorenzo", valore: 22},
+        {nome: "Bellanova", valore: 7},
+        {nome: "Darmian", valore: 4},
+        {nome: "Holm", valore: 7}],
+    terzinoS: [
+        {nome: "Theo", valore: 55},
+        {nome: "Kristiansen", valore: 12},
+        {nome: "Biraghi", valore: 4},
+        {nome: "Angelino", valore: 8},
+        {nome: "Hysaj", valore: 4},
+        {nome: "Mario Rui", valore: 5},
+        {nome: "Dimarco", valore: 50}],
+    centrocampistaCC: [
+        {nome: "Calhanoglu", valore: 40},
+        {nome: "Bennacer", valore: 35},
+        {nome: "Locatelli", valore: 33},
+        {nome: "Ederson", valore: 27},
+        {nome: "Freuler", valore: 65},
+        {nome: "Arthur", valore: 15},
+        {nome: "Parades", valore: 8},
+        {nome: "Guendozi", valore: 20},
+        {nome: "Lobotka", valore: 35},
+        {nome: "Ricci", valore: 20},
+        {nome: "Mandragora", valore: 8.5},
+        {nome: "Cristante", valore: 20},
+        {nome: "Pasalic ", valore: 13},
+        {nome: "Koopmeiners", valore: 30},
+        {nome: "Samardžić", valore: 20}],
+    centrocampistaD: [
+        {nome: "Mkhitaryan", valore: 6},
+        {nome: "Loftus", valore: 20},
+        {nome: "Rabiot", valore: 40},
+        {nome: "Miranchuk", valore: 7.5},
+        {nome: "Baldanzi", valore: 15},
+        {nome: "Cataldi", valore: 8},
+        {nome: "Bonaventura", valore: 30},
+        {nome: "Luis Alberto", valore: 18},
+        {nome: "Lazaro", valore: 4.5}],
+    centrocampistaS: [
+        {nome: "Barella", valore: 75},
+        {nome: "Reijnders", valore: 40},
+        {nome: "Mckennie", valore: 23},
+        {nome: "Cajuste", valore: 10},
+        {nome: "Ilic", valore: 18},
+        {nome: "Zappacosta", valore: 6},
+        {nome: "Aebischer", valore: 6}],
+    alaS: [
+        {nome: "Leao", valore: 90},
+        {nome: "Kvaratskhelia", valore: 80},
+        {nome: "Saelemaekers", valore: 20},
+        {nome: "Yildiz", valore: 20},
+        {nome: "Ikonè", valore: 13},
+        {nome: "Vlasic", valore: 13},
+        {nome: "Deulofeu", valore: 7}],
+    alaD: [
+        {nome: "Kostic", valore: 12},
+        {nome: "Pulisic", valore: 50},
+        {nome: "Gonzalez", valore: 40},
+        {nome: "El Shaarawy", valore: 5},
+        {nome: "Orsolini", valore: 15},
+        {nome: "Felipe Anderson", valore: 10},
+        {nome: "Isaksen", valore: 12},
+        {nome: "Politano", valore: 15},
+        {nome: "Berardi", valore: 20},
+        {nome: "Chiesa", valore: 50},
+        {nome: "Soulè", valore: 25}],
+    attaccante: [
+        {nome: "Thuram", valore: 55},
+        {nome: "Lautaro", valore: 100},
+        {nome: "Giroud", valore: 5},
+        {nome: "Vlahovic", valore: 60},
+        {nome: "De Ketaleare", valore: 25},
+        {nome: "Zirkzee", valore: 30},
+        {nome: "Belotti", valore: 20},
+        {nome: "Lukaku", valore: 35},
+        {nome: "Azmoun", valore: 10},
+        {nome: "Immobile", valore: 15},
+        {nome: "Sanabria", valore: 9.5},
+        {nome: "Zapata", valore: 45},
+        {nome: "Dybala", valore: 35},
+        {nome: "Lucca", valore: 35},
+        {nome: "Retegui", valore: 45}],
+};
+
+// Funzione avvio gioco
+function startGame(){
+    document.querySelector('.main-screen').style.display='none';
+    document.querySelector('.game-screen').style.display='flex';
+    createDropdownMenus();
+}
+
+// Crea menu e wrapper giocatori
+function createDropdownMenus(){
+    const gameScreen = document.querySelector('.game-screen');
+    const positions = {
+        portiere:{top:'50%', left:'5%'}, difensoreS:{top:'40%', left:'20%'}, difensoreD:{top:'60%', left:'20%'},
+        terzinoD:{top:'80%', left:'25%'}, terzinoS:{top:'20%', left:'25%'}, centrocampistaCC:{top:'50%', left:'40%'},
+        centrocampistaD:{top:'70%', left:'50%'}, centrocampistaS:{top:'30%', left:'50%'}, alaS:{top:'20%', left:'70%'},
+        alaD:{top:'80%', left:'70%'}, attaccante:{top:'50%', left:'70%'}
+    };
+    for(const role in players){
+        const wrapper=document.createElement('div');
+        wrapper.classList.add('player-wrapper');
+        wrapper.style.top=positions[role].top;
+        wrapper.style.left=positions[role].left;
+
+        const select=document.createElement('select');
+        select.id=role;
+        select.innerHTML=`<option value="" disabled selected>Scegli ${role}</option>`;
+        players[role].forEach(p=>{
+            select.innerHTML+=`<option value="${p.nome}">${p.nome} - ${p.valore}M</option>`;
+        });
+        select.addEventListener('change',e=>{
+            const nome=e.target.value;
+            updateBudget(nome,role);
+            displayPlayerImage(nome,role);
+        });
+
+        wrapper.appendChild(select);
+
+        const img=document.createElement('img');
+        img.id=role+'-img';
+        img.className='player-image';
+        wrapper.appendChild(img);
+
+        // Drag-and-drop
+        img.draggable=true;
+        img.addEventListener('dragstart', e=>{e.dataTransfer.setData('text/plain', role)});
+        wrapper.addEventListener('dragover', e=>{e.preventDefault();});
+        wrapper.addEventListener('drop', e=>{
+            e.preventDefault();
+            const r=e.dataTransfer.getData('text/plain');
+            const dragged=document.getElementById(r+'-img');
+            dragged.style.top=e.offsetY+'px';
+            dragged.style.left=e.offsetX+'px';
+        });
+
+        gameScreen.appendChild(wrapper);
+    }
+}
+
+function updateBudget(selectedPlayer, role) {
+    const newPlayer = players[role].find(p => p.nome === selectedPlayer);
+    if (!newPlayer) return;
+
+    // Se c'era già un giocatore selezionato in quel ruolo, restituisci il budget
+    if (selectedPlayers[role]) {
+        currentBudget += selectedPlayers[role].valore;
+    }
+
+    // Controllo budget
+    if (currentBudget >= newPlayer.valore) {
+        selectedPlayers[role] = newPlayer;
+        currentBudget -= newPlayer.valore;
+
+        document.getElementById('budget-display').innerText =
+            `Budget rimanente: ${currentBudget} milioni`;
+    } else {
+        alert("Budget insufficiente!");
+        // rollback
+        if (selectedPlayers[role]) {
+            currentBudget -= selectedPlayers[role].valore;
+        }
+    }
+}
+
+function displayPlayerImage(nome,role){
+    const p=players[role].find(x=>x.nome===nome);
+    if(p && p.img){
+        const img=document.getElementById(role+'-img');
+        img.src=p.img;
+    }
+}
+
+function confirmTeam() {
+    // Controllo ruoli mancanti
+    for (const role in selectedPlayers) {
+        if (!selectedPlayers[role]) {
+            alert(`Devi ancora scegliere: ${role}`);
+            return;
+        }
+    }
+
+    // Salva i dati (localStorage è perfetto qui)
+    localStorage.setItem("team", JSON.stringify(selectedPlayers));
+    localStorage.setItem("budgetRemaining", currentBudget);
+
+    // Vai alla pagina riassunto
+    window.location.href = "summary.html";
+}
+
+</script>
+</body>
+</html>
